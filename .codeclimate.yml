@@ -1,0 +1,27 @@
+version: "2"
+
+plugins:
+  flake8:
+    enabled: true
+    config:
+      max_line_length: 88
+      ignore:
+        - E203
+        - W503
+
+  sonar-python:
+    enabled: true
+    config:
+      tests_patterns:
+        - tests/**/*
+
+exclude_patterns:
+  - "venv/"
+  - "**/__pycache__/"
+  - "**/migrations/"
+  - "**/tests/"
+  - "resources/"
+  - "images/"
+  - "*.db"
+  - "dist/"
+  - "build/"

@@ -1,0 +1,102 @@
+
+DELETE FROM OrderItems;
+DELETE FROM Orders;
+
+INSERT INTO Orders (order_number, order_date, delivery_date, pickup_point, user_id, status_id) VALUES 
+    ('1', '2025-02-27 00:00:00', '2025-04-20 00:00:00', '420151, г. Лесной, ул. Вишневая, 32', 
+        (SELECT id FROM Users WHERE full_name='Степанов Михаил Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('2', '2022-09-28 00:00:00', '2025-04-21 00:00:00', '410172, г. Лесной, ул. Северная, 13',
+        (SELECT id FROM Users WHERE full_name='Никифорова Весения Николаевна' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('3', '2025-03-21 00:00:00', '2025-04-22 00:00:00', '630370, г. Лесной, ул. Шоссейная, 24',
+        (SELECT id FROM Users WHERE full_name='Сазонов Руслан Германович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('4', '2025-02-20 00:00:00', '2025-04-23 00:00:00', '410172, г. Лесной, ул. Северная, 13',
+        (SELECT id FROM Users WHERE full_name='Одинцов Серафим Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('5', '2025-03-17 00:00:00', '2025-04-24 00:00:00', '630370, г. Лесной, ул. Шоссейная, 24',
+        (SELECT id FROM Users WHERE full_name='Степанов Михаил Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('6', '2025-03-01 00:00:00', '2025-04-25 00:00:00', '603036, г. Лесной, ул. Садовая, 4',
+        (SELECT id FROM Users WHERE full_name='Никифорова Весения Николаевна' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('7', '2025-02-28', '2025-04-26 00:00:00', '454311, г.Лесной, ул. Новая, 19',
+        (SELECT id FROM Users WHERE full_name='Сазонов Руслан Германович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Завершен')),
+    
+    ('8', '2025-03-31 00:00:00', '2025-04-27 00:00:00', '625683, г. Лесной, ул. 8 Марта',
+        (SELECT id FROM Users WHERE full_name='Одинцов Серафим Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Новый')),
+    
+    ('9', '2025-04-02 00:00:00', '2025-04-28 00:00:00', '614510, г. Лесной, ул. Маяковского, 47',
+        (SELECT id FROM Users WHERE full_name='Степанов Михаил Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Новый')),
+    
+    ('10', '2025-04-03 00:00:00', '2025-04-29 00:00:00', '625683, г. Лесной, ул. 8 Марта',
+        (SELECT id FROM Users WHERE full_name='Степанов Михаил Артёмович' LIMIT 1),
+        (SELECT id FROM OrderStatuses WHERE name='Новый'));
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (1, (SELECT id FROM Products WHERE article='А112Т4'), 2, 4990),
+    (1, (SELECT id FROM Products WHERE article='F635R4'), 2, 3244);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (2, (SELECT id FROM Products WHERE article='H782T5'), 1, 4499),
+    (2, (SELECT id FROM Products WHERE article='G783F5'), 1, 5900);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (3, (SELECT id FROM Products WHERE article='J384T6'), 10, 3800),
+    (3, (SELECT id FROM Products WHERE article='D572U8'), 10, 4100);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (4, (SELECT id FROM Products WHERE article='F572H7'), 5, 2700),
+    (4, (SELECT id FROM Products WHERE article='D329H3'), 4, 1890);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (5, (SELECT id FROM Products WHERE article='А112Т4'), 2, 4990),
+    (5, (SELECT id FROM Products WHERE article='F635R4'), 2, 3244);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (6, (SELECT id FROM Products WHERE article='H782T5'), 1, 4499),
+    (6, (SELECT id FROM Products WHERE article='G783F5'), 1, 5900);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (7, (SELECT id FROM Products WHERE article='J384T6'), 10, 3800),
+    (7, (SELECT id FROM Products WHERE article='D572U8'), 10, 4100);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (8, (SELECT id FROM Products WHERE article='F572H7'), 5, 2700),
+    (8, (SELECT id FROM Products WHERE article='D329H3'), 4, 1890);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (9, (SELECT id FROM Products WHERE article='B320R5'), 5, 4300),
+    (9, (SELECT id FROM Products WHERE article='G432E4'), 1, 2800);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order) VALUES 
+    (10, (SELECT id FROM Products WHERE article='S213E3'), 5, 2156),
+    (10, (SELECT id FROM Products WHERE article='E482R4'), 5, 1800);
+
+
+UPDATE Orders SET total_amount = (
+    SELECT SUM(quantity * price_at_order) 
+    FROM OrderItems 
+    WHERE OrderItems.order_id = Orders.id
+);
+

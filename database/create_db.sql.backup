@@ -1,0 +1,180 @@
+
+DROP TABLE IF EXISTS OrderItems;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Categories;
+DROP TABLE IF EXISTS Manufacturers;
+DROP TABLE IF EXISTS Suppliers;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Roles;
+
+
+CREATE TABLE Roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(200)
+);
+
+
+CREATE TABLE Users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES Roles(id)
+);
+
+
+CREATE TABLE Categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
+
+CREATE TABLE Manufacturers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    country VARCHAR(100),
+    website VARCHAR(200)
+);
+
+
+CREATE TABLE Suppliers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL,
+    contact_person VARCHAR(100),
+    phone VARCHAR(20),
+    email VARCHAR(100),
+    address TEXT
+);
+
+
+CREATE TABLE Products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article VARCHAR(50) UNIQUE,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    category_id INTEGER,
+    manufacturer_id INTEGER,
+    supplier_id INTEGER,
+    price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+    unit VARCHAR(20) DEFAULT 'шт',
+    quantity INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    discount INTEGER DEFAULT 0 CHECK (discount >= 0 AND discount <= 100),
+    image_path VARCHAR(500),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES Categories(id),
+    FOREIGN KEY (manufacturer_id) REFERENCES Manufacturers(id),
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(id)
+);
+
+
+CREATE TABLE Orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_number VARCHAR(50) UNIQUE,
+    user_id INTEGER,
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    delivery_date DATETIME,
+    pickup_point VARCHAR(200),
+    status_id INTEGER,
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+
+CREATE TABLE OrderStatuses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+);
+
+
+CREATE TABLE OrderItems (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    price_at_order DECIMAL(10,2) NOT NULL,
+    discount_at_order INTEGER DEFAULT 0,
+    FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(id)
+);
+
+
+INSERT INTO Roles (id, name, description) VALUES 
+    (1, 'admin', 'Администратор - полный доступ'),
+    (2, 'manager', 'Менеджер - управление товарами и просмотр заказов'),
+    (3, 'client', 'Клиент - просмотр товаров');
+
+
+INSERT INTO OrderStatuses (id, name, description) VALUES 
+    (1, 'Новый', 'Заказ создан, ожидает обработки'),
+    (2, 'В обработке', 'Заказ обрабатывается'),
+    (3, 'Готов к выдаче', 'Заказ готов, можно забирать'),
+    (4, 'Выдан', 'Заказ выдан клиенту'),
+    (5, 'Отменен', 'Заказ отменен');
+
+
+INSERT INTO Users (login, password, full_name, role_id) VALUES 
+    ('admin', 'admin123', 'Администратор Системы', 1),
+    ('manager', 'manager123', 'Иванов Иван Иванович', 2),
+    ('client', 'client123', 'Петров Петр Петрович', 3);
+
+
+INSERT INTO Categories (id, name, description) VALUES 
+    (1, 'Кроссовки', 'Спортивная обувь для бега и активного отдыха'),
+    (2, 'Ботинки', 'Утепленная обувь для холодного сезона'),
+    (3, 'Туфли', 'Классическая обувь для офиса и торжеств'),
+    (4, 'Сандалии', 'Легкая летняя обувь'),
+    (5, 'Сапоги', 'Высокая обувь для зимы и межсезонья');
+
+
+INSERT INTO Manufacturers (id, name, country, website) VALUES 
+    (1, 'Nike', 'USA', 'https://www.nike.com'),
+    (2, 'Adidas', 'Germany', 'https://www.adidas.com'),
+    (3, 'Reebok', 'USA', 'https://www.reebok.com'),
+    (4, 'Skechers', 'USA', 'https://www.skechers.com'),
+    (5, 'ECCO', 'Denmark', 'https://www.ecco.com');
+
+
+INSERT INTO Suppliers (id, name, contact_person, phone, email, address) VALUES 
+    (1, 'ООО "ОбувьОпт"', 'Сидоров А.А.', '+7 (495) 123-45-67', 'info@obuvopt.ru', 'г. Москва, ул. Тверская, д. 1'),
+    (2, 'ИП Петров', 'Петров И.И.', '+7 (812) 765-43-21', 'petrov@mail.ru', 'г. Санкт-Петербург, Невский пр., д. 10'),
+    (3, 'ТД "Мир Обуви"', 'Иванова Е.В.', '+7 (343) 987-65-43', 'td@mirobuv.ru', 'г. Екатеринбург, ул. Ленина, д. 50');
+
+
+INSERT INTO Products (article, name, description, category_id, manufacturer_id, supplier_id, price, unit, quantity, discount, image_path) VALUES 
+    ('SN001', 'Nike Air Max', 'Легкие кроссовки с воздушной подушкой', 1, 1, 1, 8990.00, 'шт', 25, 10, NULL),
+    ('SN002', 'Adidas Ultraboost', 'Беговые кроссовки с отличной амортизацией', 1, 2, 1, 12990.00, 'шт', 15, 20, NULL),
+    ('SN003', 'Reebok Classic', 'Классические кроссовки в ретро-стиле', 1, 3, 2, 5990.00, 'шт', 30, 5, NULL),
+    ('BT001', 'ECCO Warm Boots', 'Теплые зимние ботинки с мембраной', 2, 5, 3, 15990.00, 'шт', 10, 15, NULL),
+    ('BT002', 'Adidas Terrex', 'Треккинговые ботинки для гор', 2, 2, 1, 11990.00, 'шт', 8, 10, NULL),
+    ('TF001', 'Skechers Office', 'Удобные туфли для офиса', 3, 4, 2, 4990.00, 'шт', 20, 0, NULL),
+    ('SD001', 'Skechers Summer', 'Легкие сандалии для пляжа', 4, 4, 2, 2990.00, 'шт', 0, 30, NULL),
+    ('SG001', 'ECCO Warm Boots High', 'Высокие сапоги на меху', 5, 5, 3, 18990.00, 'шт', 5, 25, NULL);
+
+
+INSERT INTO Orders (order_number, user_id, order_date, delivery_date, pickup_point, status_id, total_amount) VALUES 
+    ('ORD-001', 3, datetime('now', '-5 days'), datetime('now', '+2 days'), 'г. Москва, ул. Тверская, д. 1', 2, 8990.00),
+    ('ORD-002', 3, datetime('now', '-2 days'), datetime('now', '+5 days'), 'г. Санкт-Петербург, Невский пр., д. 10', 1, 24980.00);
+
+
+INSERT INTO OrderItems (order_id, product_id, quantity, price_at_order, discount_at_order) VALUES 
+    (1, 1, 1, 8990.00, 10),
+    (2, 2, 1, 12990.00, 20),
+    (2, 5, 1, 11990.00, 10);
+
+
+CREATE INDEX idx_products_name ON Products(name);
+CREATE INDEX idx_products_category ON Products(category_id);
+CREATE INDEX idx_products_manufacturer ON Products(manufacturer_id);
+CREATE INDEX idx_products_supplier ON Products(supplier_id);
+CREATE INDEX idx_orders_user ON Orders(user_id);
+CREATE INDEX idx_orders_status ON Orders(status_id);
+CREATE INDEX idx_orderitems_order ON OrderItems(order_id);
+CREATE INDEX idx_orderitems_product ON OrderItems(product_id);
+
